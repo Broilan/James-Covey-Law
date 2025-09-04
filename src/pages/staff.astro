@@ -1,34 +1,279 @@
 ---
 import Base from "../layouts/Base.astro";
 
+// Your roster stays the source of truth
 const staff = [
   { name: "Robyn Haffield", role: "Senior Paralegal & Firm Manager" },
   { name: "Melanie Kelhoffer", role: "Senior Paralegal" },
   { name: "Sierra Gullo", role: "Paralegal" },
   { name: "Sandy Robinson", role: "Paralegal" },
   { name: "Debbie Hogsten", role: "Accounting Services" },
+  // The bios also include Merrily; add her here so she appears with a modal
+  { name: "Merrily Dee Minardi", role: "Bookkeeper" },
 ];
 
+// Name → Bio text
+const bios: Record<string, string> = {
+  "Robyn Haffield": `Robyn is a 5th generation Floridian, only living a few miles from where she was raised.
+
+Robyn started her legal career as a law firm receptionist at the age of 15 while just a sophomore in high school, and became so intrigued that she has remained employed in this same field since that time. She now serves as Mr. Covey’s Firm Administrator and Sr. Paralegal, handling complex probate, trust and guardianship administration matters, litigation matters, as well as oversight and daily supervision of the staff employed by Mr. Covey, and the training of new staff persons. She has been employed by Mr. Covey since 2008, and brought with her a wealth of knowledge that has been of great benefit to the firm.
+
+On March 1, 2008, The Florida Bar approved the recognition of the Florida Registered Paralegal (FRP), for those persons who have met certain educational and work experience requirements. Robyn was granted this designation on March 10, 2008, just mere days after the program was approved by The Florida Bar. Robyn is also a member of the Real Property, Probate and Trust Law Section of The Florida Bar, The National Association of Legal Assistants, and The Florida Chapter of the Treasure Coast Paralegal Association. She faithfully maintains her CLE requirements in order to stay educated on the ever changing laws and procedures that effect Florida.`,
+  "Melanie Kelhoffer": `Melanie B. Kelhoffer was born in Vero Beach, Florida and was raised in Fort Pierce.
+
+Melanie started her legal career as a Court Clerk for the St. Lucie County Clerk of Courts in 2002 working in the traffic division.
+
+In 2004, she joined the auto division of Citi Financial as a loan processor. In 2005, she began training and taking the required credit and educational classes necessary to become a Buyer (loan officer). In 2006, Melanie was promoted and remained in her position until Citi Financial Auto branches across the country were closed in 2008.
+
+After the closure of the auto division, Melanie decided to pursue her lifelong dream of becoming a Paralegal. She returned to college in the Summer of 2008 and graduated with honors receiving her Associate of Science degree in Legal Assisting/Paralegal Studies from Indian River State College.
+
+Melanie joined Mr. Covey’s team on October 7, 2010, as a legal receptionist/assistant and now proudly serves his team as a Senior Paralegal, Trust Administration Coordinator and Firm Scheduling Manager.
+
+Melanie handles a vast array of duties which include, calendaring and scheduling management for the firm, trust administration coordination, concierge services assistant, corporate and business matters, real estate, and other daily client and administrative duties.
+
+Melanie enjoys spending time with her husband, children, granddaughter, and beloved rescue dogs. She volunteers her time at a local non-profit charity feeding the homeless and local shelters, as well as aiding (food, clothing, etc.) residents, families, and children in need.`,
+  "Sierra Gullo": `I am Sierra, and I have the pleasure of working as Jim Covey’s estate planning paralegal. I thrive on developing client relationships through the work we provide and enjoy spending time getting to know each client we have the opportunity to serve. In my free time, I enjoy herpetology, entomology, and time on the water. I am fortunate to live in our beautiful seaside town, and I look forward to being able to assist you with your estate planning goals!`,
+  "Sandy Robinson": `My name is Sandy Robinson, I have been a Paralegal for 35 years, working in various areas of law, with my main background being in probate, estate planning and real estate. I love the study and practice of the law and assisting our clients through the probate process. I started life in upstate New York but am close to being a native after living in Florida for over 50 years. I miss the northern spring and fall weather, but the sun, beach and coastal waters are my happy place.`,
+  "Merrily Dee Minardi": `Merrily Dee Minardi was born in Buffalo, New York, and was raised in Silver Creek, New York, a small village on Lake Erie. She has been a Florida resident for most of her adult life.
+
+Merrily holds an Associate of Science degree in legal assisting, as well as a Bachelor’s Degree in Business Administration/Finance.
+
+Prior to joining Mr. Covey’s team, she owned and operated a business for twenty-eight (28) years. After selling her business, she was a manager for H&R Block.
+
+Merrily joined Mr. Covey’s team on August 24, 2011 and serves as Mr. Covey’s Bookkeeper. She handles payroll, accounts receivable, accounts payable, client billing, bank reconciliation, income tax and estate tax preparation, private accounting for Trusts, Estates, Power of Attorney’s, Guardianships, personal client assistance, and Trust Management, which includes, bookkeeping, accounting, reconciliations, some property management, and beneficiary relations.
+
+Merrily enjoys outdoor-based activities, in particular boating, fishing, swimming, and gardening. She is also an active volunteer at special events for local nonprofit groups, in positions ranging from guiding tours, to selling plants, to volunteer coordination for charity auctions.`,
+};
+
 // Function to turn first name into email
-function emailFromName(fullName) {
+function emailFromName(fullName: string) {
   const firstName = fullName.split(" ")[0].toLowerCase();
   return `${firstName}@jcoveylaw.com`;
 }
+
+// Slug for dialog IDs
+function slugify(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
 ---
+
 <Base title="Our Team | Law Offices of James P. Covey, P.A.">
   <h1 class="text-3xl font-bold mb-6">Our Team</h1>
+
   <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-    {staff.map((m) => (
-      <li class="border rounded-xl p-4 bg-white">
-        <h2 class="font-semibold text-brand">{m.name}</h2>
-        <p class="text-zinc-700">{m.role}</p>
-        <p class="mt-1 text-sm">
-          <a class="underline underline-offset-4 text-accent hover:text-brand"
-             href={`mailto:${emailFromName(m.name)}`}>
-            {emailFromName(m.name)}
-          </a>
-        </p>
-      </li>
-    ))}
+    {staff.map((m) => {
+      const hasBio = Boolean(bios[m.name]);
+      const id = `bio-${slugify(m.name)}`;
+      return (
+        <li class="border rounded-xl p-4 bg-white flex flex-col justify-between">
+          <div>
+            <h2 class="font-semibold text-brand">{m.name}</h2>
+            <p class="text-zinc-700">{m.role}</p>
+            <p class="mt-1 text-sm">
+              <a
+                class="underline underline-offset-4 text-accent hover:text-brand"
+                href={`mailto:${emailFromName(m.name)}`}
+              >
+                {emailFromName(m.name)}
+              </a>
+            </p>
+          </div>
+
+          <div class="mt-4">
+            {hasBio ? (
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-brand"
+                data-open={id}
+                aria-haspopup="dialog"
+                aria-controls={id}
+              >
+                View bio
+              </button>
+            ) : (
+              <span class="text-xs text-zinc-500">Bio coming soon</span>
+            )}
+          </div>
+
+          {hasBio && (
+  <dialog id={id} class="modal">
+    <form method="dialog" class="m-0">
+      <div class="modal-card">
+        <header class="modal-header">
+          <div>
+            <h3 class="modal-title">{m.name}</h3>
+            <p class="modal-subtitle">{m.role}</p>
+            <p class="mt-1 text-xs">
+              <a
+                class="underline underline-offset-4 text-accent hover:text-brand"
+                href={`mailto:${emailFromName(m.name)}`}
+              >
+                {emailFromName(m.name)}
+              </a>
+            </p>
+          </div>
+          <button
+            type="submit"
+            class="modal-close"
+            aria-label="Close"
+            title="Close"
+          >
+            ✕
+          </button>
+        </header>
+
+        <div class="modal-body">
+          <div class="whitespace-pre-line leading-relaxed text-zinc-800">
+            {bios[m.name]}
+          </div>
+        </div>
+      </div>
+    </form>
+  </dialog>
+)}
+        </li>
+      );
+    })}
   </ul>
+
+  {/* Modal behavior: open/close, Esc, backdrop click, simple focus handling */}
+  <script is:inline>
+    // Ensure DOM is ready before wiring up
+    document.addEventListener("DOMContentLoaded", function () {
+      // Open by clicking any element with [data-open]
+      document.addEventListener("click", function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest("[data-open]") : null;
+        if (!btn) return;
+        var id = btn.getAttribute("data-open");
+        var dlg = id ? document.getElementById(id) : null;
+        if (dlg && typeof dlg.showModal === "function") {
+          dlg.showModal();
+          var closeBtn = dlg.querySelector("button[type='submit']");
+          if (closeBtn && typeof closeBtn.focus === "function") closeBtn.focus();
+        }
+      });
+
+      // Add backdrop click + Esc behavior to each dialog
+      document.querySelectorAll("dialog").forEach(function (dlgEl) {
+        var dlg = dlgEl; // plain JS
+
+        // Close on backdrop click
+        dlg.addEventListener("click", function (ev) {
+          var rect = dlg.getBoundingClientRect();
+          var inBounds =
+            ev.clientX >= rect.left &&
+            ev.clientX <= rect.right &&
+            ev.clientY >= rect.top &&
+            ev.clientY <= rect.bottom;
+          if (!inBounds) dlg.close();
+        });
+
+        // Esc closes (some browsers need this)
+        dlg.addEventListener("cancel", function () {
+          dlg.close();
+        });
+      });
+    });
+  </script>
+
+
+<style is:global>
+  /* Backdrop: softer dim, not full black */
+  dialog::backdrop {
+    background: rgba(0,0,0,0.35);
+  }
+  @supports (backdrop-filter: blur(4px)) {
+    dialog::backdrop {
+      backdrop-filter: blur(4px);
+    }
+  }
+
+  dialog.modal {
+    padding: 0;
+    border: 0;
+    inset: 0;
+    margin: auto;
+    max-width: min(48rem, 92vw);
+    max-height: min(85vh, 100dvh - 3rem);
+    background: transparent;
+  }
+  @supports not (inset: 0) {
+    dialog.modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+    }
+  }
+
+  .modal-card {
+    background: #ffffff;                 /* white background */
+    color: #000000;                      /* black text */
+    border-radius: 1rem;
+    border: 1px solid rgba(0,0,0,0.15);  /* subtle border */
+    box-shadow: 0 10px 28px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: inherit;
+    overflow: hidden;
+    animation: modal-in .16s ease-out;
+  }
+
+  .modal-header {
+    display: flex;
+    gap: .75rem;
+    align-items: start;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,.1);
+    background: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .modal-title {
+    font-weight: 700;
+    font-size: 1.125rem;
+    line-height: 1.25;
+    color: #000000;
+  }
+
+  .modal-subtitle {
+    font-size: .875rem;
+    color: #444; /* slightly softer than pure black */
+    margin-top: .25rem;
+  }
+
+  .modal-close {
+    appearance: none;
+    border: 1px solid rgba(0,0,0,0.2);
+    background: #fff;
+    border-radius: .5rem;
+    padding: .25rem .5rem;
+    font-size: .875rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #000;
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.05); }
+  .modal-close:focus { outline: 2px solid var(--brand, #0ea5b7); outline-offset: 2px; }
+
+  .modal-body {
+    padding: 1rem 1rem 1.25rem;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  @keyframes modal-in {
+    from { transform: translateY(6px); opacity: 0; }
+    to   { transform: translateY(0);   opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .modal-card { animation: none; }
+  }
+</style>
+
+
 </Base>
